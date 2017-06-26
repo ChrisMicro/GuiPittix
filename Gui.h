@@ -94,6 +94,7 @@ class GUI_Led : public GUI_Object
     void showLabel()
     {
       tft.setTextColor(COLOR_GREEN);
+      tft.setTextSize(textSize);
       tft.setCursor(xxText,yy);
       tft.print(ledName);
     }
