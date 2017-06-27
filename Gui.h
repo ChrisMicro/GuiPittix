@@ -17,6 +17,8 @@ TFT_Adapter tft;
  ****************************************************************************************/
 // For the Adafruit shield, these are the default.
 
+int TouchX,TouchY,ScreenTouched;
+
 class Gui
 {
   public:
@@ -24,6 +26,13 @@ class Gui
   {
       tft.begin();
       tft.fillScreen(COLOR_BLACK);
+  }
+  
+  void setTouch(int x,int y,int z)
+  {
+    TouchX=x;
+    TouchY=y;
+    ScreenTouched=z;
   }
 };
 
@@ -46,13 +55,13 @@ class GUI_Object
 
     void init()
     {
-      textSize = 3;
+      textSize = 2;
       x = layoutNext_x;
       y = layoutNext_y;
       w = LAYOUT_TILE_WIDTH  * textSize; 
       h = LAYoUT_TILE_HEIGTH * textSize;
       layoutNext_y += h + textSize;
-      color           = COLOR_RED;
+      color           = COLOR_BLUE;
       colorBackground = COLOR_BLACK;   
     }
 
@@ -69,7 +78,7 @@ class GUI_Object
       
       init();
     };
-    
+        
     void setColor(uint16_t c)
     {
       color=c;
@@ -80,6 +89,19 @@ class GUI_Object
       tft.fillRect(x, y, w, h, colorBackground);
       tft.drawRect(x, y, w, h, color);
       tft.setCursor(x + w, y);
+    }
+    
+    boolean isHit()
+    {
+      boolean flag = false;
+      if ( TouchX > x && TouchX < x + w && TouchY > y && TouchY < y + h ) flag = true;
+      return flag;
+    }
+    
+    boolean isPressed()
+    {
+      boolean flag = isHit() && (ScreenTouched != 0 );
+      return flag;      
     }
 
 };
@@ -238,6 +260,91 @@ class GUI_Led : public GUI_Object
       tft.fillCircle(xx, yy, rr, COLOR_GREY);
       tft.fillCircle(xx , yy , rr - 4, colorBackground);
     }
+};
+
+// standard font
+#define FONT_WIDTH 5
+#define FONT_HEIGTH 8
+
+class GUI_Number: public GUI_Object
+{
+  public:
+    char * objectName;
+    
+    int ElementX,ElementY;
+    int ElementW,ElementH;
+    
+    int TextPosY;
+    
+    int number=0;
+
+    void init(char * txt)
+    {
+      w=( FONT_WIDTH + 2 ) * textSize;
+      h=( FONT_HEIGTH + 2 ) * textSize;      
+      x = layoutNext_x;
+      y = layoutNext_y;
+      
+      objectName = txt;
+      int textOffset = (strlen(txt)+2) * 5 * textSize;
+
+      //ElementW = LAYOUT_TILE_WIDTH  * textSize; 
+      
+      ElementW = (10+ 1 ) * FONT_WIDTH * textSize; //10 digits
+      ElementH = h;
+      
+      int offset = textOffset + 1;
+      
+      w          = ElementW + offset;
+      ElementX   = x + offset;
+      ElementY   = y ;
+      
+      //TextPosY = y + h / 2 + 1;
+      TextPosY = y+1*textSize;      
+    }
+    
+    GUI_Number(char * txt)
+    {
+      init(txt);
+    }
+    
+    GUI_Number(uint16_t posX,uint16_t posY,char * txt)
+    {
+      layoutNext_x = posX;
+      layoutNext_y = posY;
+      init(txt);
+    }
+
+    void showLabel()
+    {
+      tft.setTextColor(COLOR_GREEN);
+      tft.setTextSize(textSize);
+      tft.setCursor(x,TextPosY);
+      tft.print(objectName);
+    }
+    
+    void show()
+    {
+      showLabel();
+      //GUI_Object::show();
+      // label frame
+      //tft.drawRect(x, y, w, h, COLOR_GREY);
+      tft.fillRect(ElementX, ElementY, ElementW, ElementH, COLOR_GREY);
+      //tft.fillRect(ElementX, ElementY, ElementW, ElementH, colorBackground);
+  
+      tft.setCursor(ElementX+2*textSize, ElementY+ 1*textSize);
+      tft.setTextColor(color);
+      tft.print(number);
+      //number frame
+      //tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED);      
+    }
+
+    void print(int num)
+    {
+       number=num;
+       show();       
+    }
+	
 };
 
 /*
