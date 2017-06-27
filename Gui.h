@@ -42,7 +42,7 @@ class GUI_Object
     uint16_t color;
     uint16_t colorBackground;
     static uint16_t layoutNext_x, layoutNext_y;
-    uint8_t textSize;
+    uint8_t textSize; // 1,2,3 ..
 
     void init()
     {
@@ -51,7 +51,7 @@ class GUI_Object
       y = layoutNext_y;
       w = LAYOUT_TILE_WIDTH  * textSize; 
       h = LAYoUT_TILE_HEIGTH * textSize;
-      layoutNext_y += h;
+      layoutNext_y += h + textSize;
       color           = COLOR_RED;
       colorBackground = COLOR_BLACK;   
     }
@@ -156,6 +156,91 @@ class GUI_labeledObject: public GUI_Object
 	
 };
 
+
+class GUI_Led : public GUI_Object
+{
+  public:
+    char * objectName;
+    
+    int ElementX,ElementY;
+    int ElementW,ElementH;
+    
+    int TextPosY;
+    
+    int xx, yy, rr;
+
+
+    void init(char * txt)
+    {
+      x = layoutNext_x;
+      y = layoutNext_y;
+      
+      objectName = txt;
+      int textOffset = (strlen(txt)+2) * 5 * textSize;
+
+      //ElementW = LAYOUT_TILE_WIDTH  * textSize;
+      ElementH = w;
+      ElementH = h;
+      
+      int offset = textOffset + 1;
+      
+      w          = ElementW + offset;
+      ElementX   = x + offset;
+      ElementY   = y;
+      
+      TextPosY = y + h / 2 + 1;    
+      
+      rr = h / 2 - 2;
+      xx = ElementX + h/2;
+      yy = ElementY + h/2;
+    }
+    
+    GUI_Led(char * txt)
+    {
+      init(txt);
+    }
+    
+    GUI_Led(uint16_t posX,uint16_t posY,char * txt)
+    {
+      layoutNext_x = posX;
+      layoutNext_y = posY;
+      init(txt);
+    }
+
+    void showLabel()
+    {
+      tft.setTextColor(COLOR_GREEN);
+      tft.setTextSize(textSize);
+      tft.setCursor(x,TextPosY);
+      tft.print(objectName);
+    }
+    
+    void show()
+    {
+      showLabel();
+      //GUI_Object::show();
+      //tft.drawRect(x, y, w, h, COLOR_GREY);
+      //tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED);      
+    }  
+    
+    void on()
+    {
+      showLabel();
+      //tft.drawRect(x, y, w, h, COLOR_GREY);
+      //tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED); 
+      tft.fillCircle(xx, yy, rr, COLOR_GREY);
+      tft.fillCircle(xx, yy, rr - 4, color);
+    }
+
+    void off()
+    {
+      showLabel();
+      tft.fillCircle(xx, yy, rr, COLOR_GREY);
+      tft.fillCircle(xx , yy , rr - 4, colorBackground);
+    }
+};
+
+/*
 class GUI_Led : public GUI_Object
 {
   public:
@@ -202,7 +287,7 @@ class GUI_Led : public GUI_Object
       tft.fillCircle(xx , yy , rr - 4, colorBackground);
     }
 };
-
+*/
 #endif
 
 /* GuiPittix simple graphical user interface elemetns
