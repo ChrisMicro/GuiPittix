@@ -29,27 +29,47 @@ class Gui
 
 Gui gui;
 
+// standard text size 5x8
+
+// layout manager
+#define LAYOUT_TILE_WIDTH  30
+#define LAYoUT_TILE_HEIGTH 16
+
 class GUI_Object
 {
   public:
     uint16_t x, y, w, h;
     uint16_t color;
     uint16_t colorBackground;
-    static uint16_t xNext, yNext;
+    static uint16_t layoutNext_x, layoutNext_y;
     uint8_t textSize;
+
+    void init()
+    {
+      textSize = 3;
+      x = layoutNext_x;
+      y = layoutNext_y;
+      w = LAYOUT_TILE_WIDTH  * textSize; 
+      h = LAYoUT_TILE_HEIGTH * textSize;
+      layoutNext_y += h;
+      color           = COLOR_RED;
+      colorBackground = COLOR_BLACK;   
+    }
 
     GUI_Object()
     {
-      textSize = 3;
-      x = xNext;
-      y = yNext;
-      w = 30 * textSize; // 5x8
-      h = 16 * textSize;
-      yNext += h;
-      color           = COLOR_RED;
-      colorBackground = COLOR_BLACK;
+      init();
     };
+    
+    GUI_Object(uint16_t posX,uint16_t posY)
+    {
 
+      layoutNext_x = posX;
+      layoutNext_y = posY;
+      
+      init();
+    };
+    
     void setColor(uint16_t c)
     {
       color=c;
@@ -64,8 +84,77 @@ class GUI_Object
 
 };
 
-uint16_t GUI_Object::yNext = 5;
-uint16_t GUI_Object::xNext = 5;
+// LayoutManager 
+// start position for first object
+uint16_t GUI_Object::layoutNext_y = 5;
+uint16_t GUI_Object::layoutNext_x = 5;
+
+/*
+
+labeledObject consists of a name and a graphic
+
+*/
+
+class GUI_labeledObject: public GUI_Object
+{
+  public:
+    char * objectName;
+    
+    int ElementX,ElementY;
+    int ElementW,ElementH;
+    
+    int TextPosY;
+
+    void init(char * txt)
+    {
+      x = layoutNext_x;
+      y = layoutNext_y;
+      
+      objectName = txt;
+      int textOffset = (strlen(txt)+2) * 5 * textSize;
+
+      ElementW = LAYOUT_TILE_WIDTH  * textSize;
+      ElementH = h;
+      
+      int offset = textOffset + 1;
+      
+      w          = ElementW + offset;
+      ElementX   = x + offset;
+      ElementY   = y;
+      
+      TextPosY = y + h / 2 + 1;    
+    }
+    
+    GUI_labeledObject(char * txt)
+    {
+      init(txt);
+    }
+    
+    GUI_labeledObject(uint16_t posX,uint16_t posY,char * txt)
+    {
+      layoutNext_x = posX;
+      layoutNext_y = posY;
+      init(txt);
+    }
+
+    void showLabel()
+    {
+      tft.setTextColor(COLOR_GREEN);
+      tft.setTextSize(textSize);
+      tft.setCursor(x,TextPosY);
+      tft.print(objectName);
+    }
+    
+    void show()
+    {
+      showLabel();
+      //GUI_Object::show();
+      tft.drawRect(x, y, w, h, COLOR_GREY);
+      tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED);      
+    }
+
+	
+};
 
 class GUI_Led : public GUI_Object
 {
