@@ -36,9 +36,9 @@ void loop(void)
   led.off();
   delay(100);
 
-  number.print  (Counter);
-  number2.print (Counter*3);
-  number3.print (Counter*Counter);
+  number.print  ( Counter );
+  number2.print ( Counter*3 );
+  number3.print ( Counter*Counter );
   
   Counter++;
 
