@@ -19,6 +19,8 @@ TFT_Adapter tft;
 
 int TouchX,TouchY,ScreenTouched;
 
+
+
 class Gui
 {
   public:
@@ -26,8 +28,13 @@ class Gui
   {
       tft.begin();
       tft.fillScreen(COLOR_BLACK);
+
+      
   }
   
+  // tell the gui the finger coordinates
+  // or mouse position
+  // the coordinates can be used by the "isHit" function
   void setTouch(int x,int y,int z)
   {
     TouchX=x;
@@ -36,13 +43,20 @@ class Gui
   }
 };
 
+
+
 Gui gui;
+
+
 
 // standard text size 5x8
 
 // layout manager
 #define LAYOUT_TILE_WIDTH  30
-#define LAYoUT_TILE_HEIGTH 16
+#define LAYOUT_TILE_HEIGTH 16
+// standard font
+#define FONT_WIDTH 5
+#define FONT_HEIGTH 8
 
 class GUI_Object
 {
@@ -59,8 +73,10 @@ class GUI_Object
       x = layoutNext_x;
       y = layoutNext_y;
       w = LAYOUT_TILE_WIDTH  * textSize; 
-      h = LAYoUT_TILE_HEIGTH * textSize;
+      h = LAYOUT_TILE_HEIGTH * textSize;
+      
       layoutNext_y += h + textSize;
+      
       color           = COLOR_BLUE;
       colorBackground = COLOR_BLACK;   
     }
@@ -91,6 +107,7 @@ class GUI_Object
       tft.setCursor(x + w, y);
     }
     
+    // just check if the mouse points to the object
     boolean isHit()
     {
       boolean flag = false;
@@ -98,6 +115,7 @@ class GUI_Object
       return flag;
     }
     
+    // is the mouse button pressed?
     boolean isPressed()
     {
       boolean flag = isHit() && (ScreenTouched != 0 );
@@ -110,6 +128,99 @@ class GUI_Object
 // start position for first object
 uint16_t GUI_Object::layoutNext_y = 5;
 uint16_t GUI_Object::layoutNext_x = 5;
+
+#define BUTTON_OFF_COLOR   COLOR_GREY/3*2
+#define BUTOON_ON_COLOR    COLOR_WHITE
+#define BUTTON_TEXT_COLOR  COLOR_BLUE
+
+class GUI_Button: public GUI_Object
+{
+  public:
+  
+  char * buttonName;
+  uint8_t state=0;
+  
+  uint16_t textPosX,textPosY;
+
+  
+    void init(char * txt)
+    {
+      buttonName=txt;  
+      textSize = 2;
+      x = layoutNext_x;
+      y = layoutNext_y;
+      
+      w=(strlen(buttonName)+1)*(FONT_WIDTH+1) * textSize;
+
+      h = LAYOUT_TILE_HEIGTH * textSize;
+      
+      textPosY      = y+h/2-FONT_HEIGTH;
+      textPosX      = x + (FONT_WIDTH/2)*textSize;
+      
+      layoutNext_y += 2*textSize;
+      
+      color           = BUTTON_OFF_COLOR;
+      colorBackground = COLOR_BLACK;
+
+    }
+    
+    GUI_Button(char * txt)
+    {  
+      init(txt);
+    }
+    
+    GUI_Button(uint16_t posX,uint16_t posY,char * txt)
+    {
+      layoutNext_x=posX;
+      layoutNext_y=posY;
+      init(txt);    
+    }
+    
+    void show()
+    {
+	
+      tft.fillRoundRect(x, y, w, h, 5,color);
+  
+      //tft.setCursor(x+2*textSize, y+ 1*textSize);
+      tft.setCursor(textPosX, textPosY);
+
+      tft.setTextColor( BUTTON_TEXT_COLOR );
+      tft.print(buttonName);	    
+    }
+    
+     boolean wasPressed()
+    {
+      boolean wasPressed_flag = false;
+      switch (state)
+      {
+        case 0:
+          {
+            if (isHit())
+	    {
+		color=BUTOON_ON_COLOR;
+		state = 1;    
+	    }		    
+          } break;
+        case 1:
+          {
+            if (!isHit())
+            {
+		color=BUTTON_OFF_COLOR;
+              state = 0;
+              wasPressed_flag = true;
+            }
+          } break;
+
+      }
+      show();
+      return wasPressed_flag;
+}
+    
+};
+
+
+
+
 
 /*
 
@@ -190,6 +301,8 @@ class GUI_Led : public GUI_Object
     int TextPosY;
     
     int xx, yy, rr;
+    
+    boolean ledState=false;
 
 
     void init(char * txt)
@@ -260,11 +373,21 @@ class GUI_Led : public GUI_Object
       tft.fillCircle(xx, yy, rr, COLOR_GREY);
       tft.fillCircle(xx , yy , rr - 4, colorBackground);
     }
+    
+    void setLed(boolean offOn)
+    {
+	if(ledState)on();
+	else off();	
+    }
+    void toggle()
+    {
+	ledState=!ledState;
+	setLed(ledState);	
+    }
+    
 };
 
-// standard font
-#define FONT_WIDTH 5
-#define FONT_HEIGTH 8
+
 
 class GUI_Number: public GUI_Object
 {
@@ -347,54 +470,6 @@ class GUI_Number: public GUI_Object
 	
 };
 
-/*
-class GUI_Led : public GUI_Object
-{
-  public:
-    int xx, yy, rr;
-    int xxText,yyText;
-    char * ledName;
-
-    GUI_Led(char * txt)
-    {
-      ledName = txt;
-      int textOffset = (strlen(txt)+2) * 5 * textSize;
-
-      xxText = x ;
-      xx     = textOffset + h / 2 + 1;
-      yyText = y ;
-      yy = yyText + h / 2 + 1;
-      rr = h / 2 - 2;
-    }
-
-    GUI_Led()
-    {
-      GUI_Led: GUI_Led("");
-    }
-    
-    void showLabel()
-    {
-      tft.setTextColor(COLOR_GREEN);
-      tft.setTextSize(textSize);
-      tft.setCursor(xxText,yy);
-      tft.print(ledName);
-    }
-    
-    void on()
-    {
-      showLabel();
-      tft.fillCircle(xx, yy, rr, COLOR_GREY);
-      tft.fillCircle(xx , yy , rr - 4, color);
-    }
-
-    void off()
-    {
-      showLabel();
-      tft.fillCircle(xx, yy, rr, COLOR_GREY);
-      tft.fillCircle(xx , yy , rr - 4, colorBackground);
-    }
-};
-*/
 #endif
 
 /* GuiPittix simple graphical user interface elemetns
