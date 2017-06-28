@@ -75,7 +75,7 @@ class GUI_Object
       w = LAYOUT_TILE_WIDTH  * textSize; 
       h = LAYOUT_TILE_HEIGTH * textSize;
       
-      layoutNext_y += h + textSize;
+      //layoutNext_y += h + textSize;
       
       color           = COLOR_BLUE;
       colorBackground = COLOR_BLACK;   
@@ -124,6 +124,100 @@ class GUI_Object
 
 };
 
+class GUI_Slider : public GUI_Object
+{
+    public:
+    
+    char *   sliderName;
+    uint16_t namePosY;
+    uint8_t nameHeight;
+    uint16_t sliderPosY;
+    uint16_t sliderHeight;
+    uint16_t sliderIndicatorPosY;
+    uint8_t  sliderIndicatorHeight;
+    int32_t sliderValue;
+    uint8_t sliderPOintRadius;
+    uint16_t sliderPointPosY;
+    
+    void init(char * txt)
+    {
+      sliderName=txt;
+      textSize = 2;
+      x = layoutNext_x;
+      y = layoutNext_y;
+      namePosY=y;
+      w = FONT_WIDTH*5  * textSize; 
+      
+      nameHeight = (FONT_HEIGTH+3) * textSize; 
+
+      sliderPOintRadius = nameHeight / 2 - 2;      
+      
+      sliderPosY   = y + nameHeight ;
+      sliderHeight = 150;
+      sliderPointPosY=sliderPosY+sliderHeight/2;
+      sliderIndicatorPosY= sliderPosY + sliderHeight;
+      sliderIndicatorHeight = nameHeight;
+      
+      layoutNext_x += w + 5*textSize;
+      layoutNext_y  = y; // this shouldn't be necessary => why?
+      
+      color           = COLOR_BLUE;
+      colorBackground = COLOR_BLACK;   
+      
+      //h=sliderHeight;
+      h=sliderIndicatorPosY+sliderIndicatorHeight-sliderPosY;
+      sliderValue=10;
+    }
+
+    GUI_Slider(char * name)
+    {
+      init(name);
+    };
+    
+    
+    void show()
+    {
+
+    // name
+      tft.fillRect(x, namePosY, w, nameHeight, colorBackground);
+      //tft.drawRect(x, namePosY, w, nameHeight, color);
+      	    tft.setCursor(x+2*textSize,namePosY+2*textSize);
+	    tft.setTextColor(COLOR_BLUE);
+	    tft.setTextSize(textSize);
+	    tft.print(sliderName);
+	    
+      // slider
+      tft.fillRect(x, sliderPosY, w, sliderHeight, colorBackground);
+      tft.drawRect(x, sliderPosY, w, sliderHeight, COLOR_BLUE);
+      tft.drawRect(x+w/2-textSize, sliderPosY+sliderPOintRadius, textSize*3, sliderHeight-sliderPOintRadius*2, COLOR_GREY);
+      tft.fillCircle(x+w/2,sliderPointPosY-sliderPOintRadius,sliderPOintRadius,COLOR_BLUE);
+      // value
+      tft.fillRect(x,sliderIndicatorPosY,w,sliderIndicatorHeight,COLOR_GREY);
+      tft.drawRect(x,sliderIndicatorPosY,w,sliderIndicatorHeight,COLOR_BLUE);
+      tft.setCursor(x+2*textSize,sliderIndicatorPosY+2*textSize);
+      	    tft.setTextColor(COLOR_BLUE);
+	    tft.setTextSize(textSize);
+	    tft.print(sliderValue);
+
+    }
+    
+    int32_t getInt()
+    {
+	    if(isPressed())
+	    {
+		
+		sliderPointPosY=TouchY;
+		if(sliderPointPosY<sliderPosY+nameHeight)sliderPointPosY=sliderPosY+nameHeight;
+		if(sliderPointPosY>sliderIndicatorPosY)sliderPointPosY=sliderIndicatorPosY;
+		sliderValue = map(sliderPointPosY,sliderPosY+nameHeight,sliderIndicatorPosY,0,100);
+
+		show();
+	    }
+	    
+	return sliderValue;
+    }
+};
+
 // LayoutManager 
 // start position for first object
 uint16_t GUI_Object::layoutNext_y = 5;
@@ -154,9 +248,11 @@ class GUI_Button: public GUI_Object
 
       h = LAYOUT_TILE_HEIGTH * textSize;
       
+      
       textPosY      = y+h/2-FONT_HEIGTH;
       textPosX      = x + (FONT_WIDTH/2)*textSize;
       
+      layoutNext_y += h + textSize;
       layoutNext_y += 2*textSize;
       
       color           = BUTTON_OFF_COLOR;
@@ -219,9 +315,6 @@ class GUI_Button: public GUI_Object
 };
 
 
-
-
-
 /*
 
 labeledObject consists of a name and a graphic
@@ -255,7 +348,10 @@ class GUI_labeledObject: public GUI_Object
       ElementX   = x + offset;
       ElementY   = y;
       
-      TextPosY = y + h / 2 + 1;    
+      TextPosY = y + h / 2 + 1;   
+
+      layoutNext_y += h + textSize;
+     
     }
     
     GUI_labeledObject(char * txt)
@@ -328,6 +424,8 @@ class GUI_Led : public GUI_Object
       rr = h / 2 - 2;
       xx = ElementX + h/2;
       yy = ElementY + h/2;
+      
+      	layoutNext_y += h + textSize; 
     }
     
     GUI_Led(char * txt)
@@ -423,7 +521,9 @@ class GUI_Number: public GUI_Object
       ElementY   = y ;
       
       //TextPosY = y + h / 2 + 1;
-      TextPosY = y+1*textSize;      
+      TextPosY = y+1*textSize;   
+
+	layoutNext_y += h + 3*textSize;       
     }
     
     GUI_Number(char * txt)
