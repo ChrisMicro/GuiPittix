@@ -411,6 +411,7 @@ class GUI_Led : public GUI_Object
 
     void init(char * txt)
     {
+      color=COLOR_RED;
       x = layoutNext_x;
       y = layoutNext_y;
 
@@ -459,32 +460,36 @@ class GUI_Led : public GUI_Object
     void show()
     {
       showLabel();
-      //GUI_Object::show();
-      //tft.drawRect(x, y, w, h, COLOR_GREY);
-      //tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED);
+      if(ledState)
+      {
+	tft.fillCircle(xx, yy, rr, COLOR_GREY);
+        tft.fillCircle(xx, yy, rr - 4, color);      
+      }else
+      {
+	tft.fillCircle(xx, yy, rr, COLOR_GREY);
+        tft.fillCircle(xx , yy , rr - 4, COLOR_GREY/4);      
+      }
+
     }
 
     void on()
     {
-      showLabel();
-      //tft.drawRect(x, y, w, h, COLOR_GREY);
-      //tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED);
-      tft.fillCircle(xx, yy, rr, COLOR_GREY);
-      tft.fillCircle(xx, yy, rr - 4, color);
+       ledState=true;	    
+       show();
     }
 
     void off()
     {
-      showLabel();
-      tft.fillCircle(xx, yy, rr, COLOR_GREY);
-      tft.fillCircle(xx , yy , rr - 4, colorBackground);
+       ledState=false;
+       show();
     }
 
     void setLed(boolean offOn)
     {
-      if (ledState)on();
-      else off();
+      if (offOn) on();
+      else       off();
     }
+    
     void toggle()
     {
       ledState = !ledState;
