@@ -48,7 +48,6 @@ class Gui
 Gui gui;
 
 
-
 // standard text size 5x8
 
 // layout manager
@@ -58,6 +57,15 @@ Gui gui;
 #define FONT_WIDTH 5
 #define FONT_HEIGTH 8
 
+/*
+GUI_Object
+
+The base object of all elemetns.
+It has a position, colors and if the touch variables are set before
+you can easily detect if the object is hit or pressed.
+This is useful for making elements like buttons.
+
+*/
 class GUI_Object
 {
   public:
@@ -65,17 +73,17 @@ class GUI_Object
     uint16_t color;
     uint16_t colorBackground;
     static uint16_t layoutNext_x, layoutNext_y;
-    uint8_t textSize; // 1,2,3 ..
+    uint8_t guiSize; // 1,2,3 ..
 
     void init()
     {
-      textSize = 2;
+      guiSize = 2;
       x = layoutNext_x;
       y = layoutNext_y;
-      w = LAYOUT_TILE_WIDTH  * textSize;
-      h = LAYOUT_TILE_HEIGTH * textSize;
+      w = LAYOUT_TILE_WIDTH  * guiSize;
+      h = LAYOUT_TILE_HEIGTH * guiSize;
 
-      //layoutNext_y += h + textSize;
+      //layoutNext_y += h + guiSize;
 
       color           = COLOR_BLUE;
       colorBackground = COLOR_BLACK;
@@ -123,6 +131,13 @@ class GUI_Object
     }
 
 };
+// coerce an integer into its limits
+int coerce(int value,int min, int max)
+{
+    if(value>max)value=max;
+    if(value<min)value=min;    
+    return value;
+}
 
 class GUI_Slider : public GUI_Object
 {
@@ -142,13 +157,13 @@ class GUI_Slider : public GUI_Object
     void init(char * txt)
     {
       sliderName = txt;
-      textSize = 2;
+      guiSize = 2;
       x = layoutNext_x;
       y = layoutNext_y;
       namePosY = y;
-      w = FONT_WIDTH * 5  * textSize;
+      w = FONT_WIDTH * 5  * guiSize;
 
-      nameHeight = (FONT_HEIGTH + 3) * textSize;
+      nameHeight = (FONT_HEIGTH + 3) * guiSize;
 
       sliderPOintRadius = nameHeight / 2 - 2;
 
@@ -158,7 +173,7 @@ class GUI_Slider : public GUI_Object
       sliderIndicatorPosY = sliderPosY + sliderHeight;
       sliderIndicatorHeight = nameHeight;
 
-      layoutNext_x += w + 5 * textSize;
+      layoutNext_x += w + 5 * guiSize;
       layoutNext_y  = y; // this shouldn't be necessary => why?
 
       color           = COLOR_BLUE;
@@ -188,23 +203,23 @@ class GUI_Slider : public GUI_Object
       // name
       tft.fillRect(x, namePosY, w, nameHeight, colorBackground);
       //tft.drawRect(x, namePosY, w, nameHeight, color);
-      tft.setCursor(x + 2 * textSize, namePosY + 2 * textSize);
+      tft.setCursor(x + 2 * guiSize, namePosY + 2 * guiSize);
       tft.setTextColor(COLOR_BLUE);
-      tft.setTextSize(textSize);
+      tft.setTextSize(guiSize);
       tft.print(sliderName);
 
       // slider
       tft.fillRect(x, sliderPosY, w, sliderHeight, colorBackground);
       tft.drawRect(x, sliderPosY, w, sliderHeight, COLOR_BLUE);
-      tft.drawRect(x + w / 2 - textSize, sliderPosY + sliderPOintRadius, textSize * 3, sliderHeight - sliderPOintRadius * 2, COLOR_GREY);
+      tft.drawRect(x + w / 2 - guiSize, sliderPosY + sliderPOintRadius, guiSize * 3, sliderHeight - sliderPOintRadius * 2, COLOR_GREY);
       tft.fillCircle(x + w / 2, sliderPointPosY - sliderPOintRadius, sliderPOintRadius, COLOR_BLUE);
       
       // value
       tft.fillRect(x, sliderIndicatorPosY, w, sliderIndicatorHeight, COLOR_GREY);
       tft.drawRect(x, sliderIndicatorPosY, w, sliderIndicatorHeight, COLOR_BLUE);
-      tft.setCursor(x + 2 * textSize, sliderIndicatorPosY + 2 * textSize);
+      tft.setCursor(x + 2 * guiSize, sliderIndicatorPosY + 2 * guiSize);
       tft.setTextColor(COLOR_BLUE);
-      tft.setTextSize(textSize);
+      tft.setTextSize(guiSize);
       tft.print(sliderValue);
 
     }
@@ -215,9 +230,11 @@ class GUI_Slider : public GUI_Object
       {
 
         sliderPointPosY = TouchY;
-        if (sliderPointPosY < sliderPosY + nameHeight)sliderPointPosY = sliderPosY + nameHeight;
-        if (sliderPointPosY > sliderIndicatorPosY)sliderPointPosY = sliderIndicatorPosY;
-        sliderValue = map(sliderPointPosY, sliderPosY + nameHeight, sliderIndicatorPosY, 0, 100);
+        //if (sliderPointPosY < sliderPosY + nameHeight)sliderPointPosY = sliderPosY + nameHeight;
+        //if (sliderPointPosY > sliderIndicatorPosY)sliderPointPosY = sliderIndicatorPosY;
+	sliderPointPosY=coerce(sliderPointPosY,sliderPosY + nameHeight,sliderIndicatorPosY);
+        sliderValue = map(sliderPointPosY, sliderPosY + nameHeight, sliderIndicatorPosY, 110, -10);
+	sliderValue=coerce(sliderValue,0,100);
 
         show();
       }
@@ -248,20 +265,20 @@ class GUI_Button: public GUI_Object
     void init(char * txt)
     {
       buttonName = txt;
-      textSize = 2;
+      guiSize = 2;
       x = layoutNext_x;
       y = layoutNext_y;
 
-      w = (strlen(buttonName) + 1) * (FONT_WIDTH + 1) * textSize;
+      w = (strlen(buttonName) + 1) * (FONT_WIDTH + 1) * guiSize;
 
-      h = LAYOUT_TILE_HEIGTH * textSize;
+      h = LAYOUT_TILE_HEIGTH * guiSize;
 
 
       textPosY      = y + h / 2 - FONT_HEIGTH;
-      textPosX      = x + (FONT_WIDTH / 2) * textSize;
+      textPosX      = x + (FONT_WIDTH / 2) * guiSize;
 
-      layoutNext_y += h + textSize;
-      layoutNext_y += 2 * textSize;
+      layoutNext_y += h + guiSize;
+      layoutNext_y += 2 * guiSize;
 
       color           = BUTTON_OFF_COLOR;
       colorBackground = COLOR_BLACK;
@@ -285,7 +302,7 @@ class GUI_Button: public GUI_Object
 
       tft.fillRoundRect(x, y, w, h, 5, color);
 
-      //tft.setCursor(x+2*textSize, y+ 1*textSize);
+      //tft.setCursor(x+2*guiSize, y+ 1*guiSize);
       tft.setCursor(textPosX, textPosY);
 
       tft.setTextColor( BUTTON_TEXT_COLOR );
@@ -345,9 +362,9 @@ class GUI_labeledObject: public GUI_Object
       y = layoutNext_y;
 
       objectName = txt;
-      int textOffset = (strlen(txt) + 2) * 5 * textSize;
+      int textOffset = (strlen(txt) + 2) * 5 * guiSize;
 
-      ElementW = LAYOUT_TILE_WIDTH  * textSize;
+      ElementW = LAYOUT_TILE_WIDTH  * guiSize;
       ElementH = h;
 
       int offset = textOffset + 1;
@@ -358,7 +375,7 @@ class GUI_labeledObject: public GUI_Object
 
       TextPosY = y + h / 2 + 1;
 
-      layoutNext_y += h + textSize;
+      layoutNext_y += h + guiSize;
 
     }
 
@@ -377,7 +394,7 @@ class GUI_labeledObject: public GUI_Object
     void showLabel()
     {
       tft.setTextColor(COLOR_GREEN);
-      tft.setTextSize(textSize);
+      tft.setTextSize(guiSize);
       tft.setCursor(x, TextPosY);
       tft.print(objectName);
     }
@@ -392,6 +409,8 @@ class GUI_labeledObject: public GUI_Object
 
 
 };
+
+
 
 
 class GUI_Led : public GUI_Object
@@ -416,9 +435,9 @@ class GUI_Led : public GUI_Object
       y = layoutNext_y;
 
       objectName = txt;
-      int textOffset = (strlen(txt) + 2) * 5 * textSize;
+      int textOffset = (strlen(txt) + 2) * 5 * guiSize;
 
-      //ElementW = LAYOUT_TILE_WIDTH  * textSize;
+      //ElementW = LAYOUT_TILE_WIDTH  * guiSize;
       ElementH = w;
       ElementH = h;
 
@@ -434,7 +453,7 @@ class GUI_Led : public GUI_Object
       xx = ElementX + h / 2;
       yy = ElementY + h / 2;
 
-      layoutNext_y += h + textSize;
+      layoutNext_y += h + guiSize;
     }
 
     GUI_Led(char * txt)
@@ -452,7 +471,7 @@ class GUI_Led : public GUI_Object
     void showLabel()
     {
       tft.setTextColor(COLOR_GREEN);
-      tft.setTextSize(textSize);
+      tft.setTextSize(guiSize);
       tft.setCursor(x, TextPosY);
       tft.print(objectName);
     }
@@ -514,17 +533,17 @@ class GUI_Number: public GUI_Object
 
     void init(char * txt)
     {
-      w = ( FONT_WIDTH + 2 ) * textSize;
-      h = ( FONT_HEIGTH + 2 ) * textSize;
+      w = ( FONT_WIDTH + 2 ) * guiSize;
+      h = ( FONT_HEIGTH + 2 ) * guiSize;
       x = layoutNext_x;
       y = layoutNext_y;
 
       objectName = txt;
-      int textOffset = (strlen(txt) + 2) * 5 * textSize;
+      int textOffset = (strlen(txt) + 2) * 5 * guiSize;
 
-      //ElementW = LAYOUT_TILE_WIDTH  * textSize;
+      //ElementW = LAYOUT_TILE_WIDTH  * guiSize;
 
-      ElementW = (10 + 1 ) * FONT_WIDTH * textSize; //10 digits
+      ElementW = (10 + 1 ) * FONT_WIDTH * guiSize; //10 digits
       ElementH = h;
 
       int offset = textOffset + 1;
@@ -534,9 +553,9 @@ class GUI_Number: public GUI_Object
       ElementY   = y ;
 
       //TextPosY = y + h / 2 + 1;
-      TextPosY = y + 1 * textSize;
+      TextPosY = y + 1 * guiSize;
 
-      layoutNext_y += h + 3 * textSize;
+      layoutNext_y += h + 3 * guiSize;
     }
 
     GUI_Number(char * txt)
@@ -554,7 +573,7 @@ class GUI_Number: public GUI_Object
     void showLabel()
     {
       tft.setTextColor(COLOR_GREEN);
-      tft.setTextSize(textSize);
+      tft.setTextSize(guiSize);
       tft.setCursor(x, TextPosY);
       tft.print(objectName);
     }
@@ -568,7 +587,7 @@ class GUI_Number: public GUI_Object
       tft.fillRect(ElementX, ElementY, ElementW, ElementH, COLOR_GREY);
       //tft.fillRect(ElementX, ElementY, ElementW, ElementH, colorBackground);
 
-      tft.setCursor(ElementX + 2 * textSize, ElementY + 1 * textSize);
+      tft.setCursor(ElementX + 2 * guiSize, ElementY + 1 * guiSize);
       tft.setTextColor(color);
       tft.print(number);
       //number frame
@@ -583,6 +602,90 @@ class GUI_Number: public GUI_Object
 
 };
 
+class GUI_Text: public GUI_Object
+{
+  public:
+    char * objectName;
+
+    int ElementX, ElementY;
+    int ElementW, ElementH;
+
+    int TextPosY;
+
+    char * displayedText;
+
+    void init(char * txt)
+    {
+      w = ( FONT_WIDTH + 2 ) * guiSize;
+      h = ( FONT_HEIGTH + 2 ) * guiSize;
+      x = layoutNext_x;
+      y = layoutNext_y;
+
+      objectName = txt;
+      int textOffset = (strlen(txt) + 2) * 5 * guiSize;
+
+      //ElementW = LAYOUT_TILE_WIDTH  * guiSize;
+
+      ElementW = (10 + 1 ) * FONT_WIDTH * guiSize; //10 digits
+      ElementH = h;
+
+      int offset = textOffset + 1;
+
+      w          = ElementW + offset;
+      ElementX   = x + offset;
+      ElementY   = y ;
+
+      //TextPosY = y + h / 2 + 1;
+      TextPosY = y + 1 * guiSize;
+
+      layoutNext_y += h + 3 * guiSize;
+    }
+
+    GUI_Text(char * txt)
+    {
+      init(txt);
+      displayedText="";
+    }
+
+    GUI_Text(uint16_t posX, uint16_t posY, char * txt)
+    {
+      layoutNext_x = posX;
+      layoutNext_y = posY;
+      init(txt);
+      displayedText="";
+    }
+
+    void showLabel()
+    {
+      tft.setTextColor(COLOR_GREEN);
+      tft.setTextSize(guiSize);
+      tft.setCursor(x, TextPosY);
+      tft.print(objectName);
+    }
+
+    void show()
+    {
+      showLabel();
+      //GUI_Object::show();
+      // label frame
+      //tft.drawRect(x, y, w, h, COLOR_GREY);
+      tft.fillRect(ElementX, ElementY, ElementW, ElementH, COLOR_GREY);
+      //tft.fillRect(ElementX, ElementY, ElementW, ElementH, colorBackground);
+
+      tft.setCursor(ElementX + 2 * guiSize, ElementY + 1 * guiSize);
+      tft.setTextColor(color);
+      tft.print(displayedText);
+      //number frame
+      //tft.drawRect(ElementX, ElementY, ElementW, ElementH, COLOR_RED);
+    }
+
+    void print(char *txt)
+    {
+      displayedText=txt;
+      show();
+    }
+
+};
 #endif
 
 /* GuiPittix simple graphical user interface elemetns
