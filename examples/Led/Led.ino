@@ -11,7 +11,8 @@
 // choose your hardware:
 //#define TFT_Adapter_ILI9341_BluePill
 //#define TFT_Adapter_SPFD5408_UNO
-#define TFT_Adapter_STM32F746_Discovery
+//#define TFT_Adapter_STM32F746_Discovery
+#define TFT_TEK // TEK4010 emulation to Teraterm
 
 #include "Gui.h"
 
@@ -33,7 +34,6 @@ void loop(void)
   // we can blink easier:
   led2.toggle();
 }
-
 
 
 
