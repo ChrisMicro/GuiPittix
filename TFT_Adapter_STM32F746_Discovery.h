@@ -22,7 +22,7 @@ class TFT_Adapter : public LTDC_F746_Discovery
     {
       // The buffer is memory mapped
       // You can directly draw on the display by writing to the buffer
-      uint16_t *buffer = (uint16_t *)malloc(LTDC_F746_ROKOTECH.width * LTDC_F746_ROKOTECH.height);
+      uint16_t *buffer = (uint16_t *)malloc(LTDC_F746_ROKOTECH.width * LTDC_F746_ROKOTECH.height*2);
 
       LTDC_F746_Discovery::begin((uint16_t *)buffer);
 
