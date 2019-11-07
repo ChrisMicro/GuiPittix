@@ -853,11 +853,171 @@ class GUI_Graph: public GUI_Object
       }
     }
 };
+/************************************************************************************************
+ * 
+ * GUI_Menue
+ * 
+ ************************************************************************************************/
+#define MENUE_SELECTED_COLOR COLOR_RED
+#define MENUE_LABEL_COLOR    COLOR_GREEN
+#define MENUE_TEXT_COLOR     COLOR_WHITE
+#define MENUE_FRAME_COLOR    COLOR_GREY/2
+
+class GUI_Menue : public GUI_Object
+{
+  public:
+    char * objectName;
+
+    int ElementX, ElementY;
+    int ElementW, ElementH;
+
+    int textPosY;
+    int textPosX;
+
+    int xx, yy;
+
+    char **menue;
+    uint8_t numberOfEntries;
+
+    int8_t index;
+    int8_t numberOfEntriesDisplayed;
+
+    void set(char **menueStringArray, uint8_t numberOfEntries_)
+    {
+      menue = menueStringArray;
+      numberOfEntries = numberOfEntries_;
+    }
+
+    void init(char * txt)
+    {
+      numberOfEntriesDisplayed = 3;
+      index = 0;
+      color = COLOR_RED;
+      x = layoutNext_x;
+      y = layoutNext_y;
+
+      objectName = txt;
+      int textOffset = (strlen(txt) + 2) * 5 * guiSize;
+
+      //ElementW = LAYOUT_TILE_WIDTH  * guiSize;
+      ElementH = w;
+      ElementH = h;
+
+      int offset = textOffset + 1;
+
+      w          = 80;
+      h          = 100;
+      ElementX   = x + offset;
+      ElementY   = y;
+
+      textPosX   = x;
+      textPosY   = y;// + guiSize;
+
+
+      //rr = h / 2 - 2;
+      //xx = ElementX + h / 2;
+      //yy = ElementY + h / 2;
+
+      //layoutNext_y += h + guiSize;//FONT_HEIGTH * 2
+      layoutNext_y += h + FONT_HEIGTH * 4;
+    }
+
+    GUI_Menue(char * txt)
+    {
+      init(txt);
+    }
+
+    GUI_Menue(uint16_t posX, uint16_t posY, char * txt)
+    {
+      layoutNext_x = posX;
+      layoutNext_y = posY;
+      init(txt);
+    }
+
+    void showLabel()
+    {
+      tft.setTextColor(COLOR_GREEN);
+      tft.setTextSize(guiSize);
+      tft.setCursor(x, textPosY);
+      tft.print(objectName);
+    }
+
+    void show()
+    {
+      int8_t idx;
+
+      // draw frame
+      int pos = textPosY;//+ FONT_HEIGTH;
+
+      uint8_t font_height;
+      font_height = FONT_HEIGTH * 2;
+
+      tft.fillRect(x, pos + font_height * 2, w, h, MENUE_FRAME_COLOR);
+
+      pos += font_height;
+      //tft.fillRect(x, y + POSITION_OFFSET_Y, HORIZONTAL_RESOLUTION + 2, VERTICAL_RESOLUTION + 2, GRAPH_FRAME_COLOR);
+
+      // draw label
+      //tft.setCursor(x+2*guiSize, y+ 1*guiSize);
+      tft.setTextSize(guiSize );
+
+      tft.setCursor(textPosX, pos );
+      tft.setTextColor( MENUE_LABEL_COLOR );
+      tft.print(objectName);
+      tft.setTextColor( MENUE_TEXT_COLOR );
+      idx = index;
+
+      pos += font_height;
+
+      idx--;
+      if (idx < 0)idx = numberOfEntries - 1;
+
+      for (int n = 0; n < numberOfEntriesDisplayed; n++)
+      {
+        pos += font_height;
+        tft.setCursor(textPosX, pos );
+        if (n == 1) tft.setTextColor( COLOR_YELLOW, MENUE_SELECTED_COLOR );
+        else        tft.setTextColor( MENUE_TEXT_COLOR );
+
+        tft.print(menue[idx]);
+        idx++;
+        if (idx > numberOfEntries - 1)
+        {
+          pos += font_height;
+          tft.setCursor(textPosX, pos );
+          tft.setTextColor( MENUE_TEXT_COLOR );
+          tft.print("-----");
+          idx = 0;
+        }
+      }
+
+    }
+
+    void up()
+    {
+      index++;
+      if (index >= numberOfEntries)index = 0;
+      show();
+    }
+
+    void down()
+    {
+      index--;
+      if (index < 0) index = numberOfEntries;
+      show();
+    }
+
+    int8_t getIndex()
+    {
+      return index;
+    }
+
+};
 #endif
 
 /* GuiPittix simple graphical user interface elemetns
 
-   © ChrisMicro 2017.
+   © ChrisMicro 2017-2019.
 
    This file is part of GuiPittix.
 
