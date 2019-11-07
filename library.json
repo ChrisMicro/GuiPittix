@@ -1,0 +1,21 @@
+{
+  "name": "GuiPittix",
+  "keywords": "GUI, TFT",
+  "description": "GUI library with simple graphical elements like leds, buttons, sliders, graphs",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/ChrisMicro/GuiPittix.git"
+  },
+  "authors":
+  [
+    {
+      "name": "ChrisMicro",
+      "email": "christoph@roboterclub-freiburg.de",
+      "maintainer": true
+    }
+  ],
+  "version": "0.2",
+  "frameworks": ["arduino"],
+  "platforms": "*"
+}
