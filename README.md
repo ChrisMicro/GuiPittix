@@ -11,11 +11,6 @@ The code is reduced to the absolute minimum and the API is made as simple as pos
 
 To get an impression take a look at the [Led example](https://github.com/ChrisMicro/GuiPittix/blob/master/examples/Led/Led.ino)
 
-## Demo Applications
-- playing sound 
-- using the accelerometer
-- controlling the sound with the accelerometer
-
 ## Installation
 
 Libraries used:
