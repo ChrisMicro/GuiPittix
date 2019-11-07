@@ -694,7 +694,7 @@ class GUI_Text: public GUI_Object
  ************************************************************************************************/
 
 #define GRAPH_TEXT_COLOR     COLOR_GREY
-#define GRAPH_FRAME_COLOR    COLOR_GREY/3
+#define GRAPH_FRAME_COLOR    COLOR_GREY
 #define GRAPH_SIGNAL_COLOR   COLOR_YELLOW
 
 #define SIGNAL_LENGTH 128 // be aware that on the ARDUINO with ATMEGA328 you have only 2K of RAM
@@ -793,9 +793,10 @@ class GUI_Graph: public GUI_Object
 
     void show()
     {
+
       // draw frame
       tft.drawRect(x, y + POSITION_OFFSET_Y, HORIZONTAL_RESOLUTION + 2, VERTICAL_RESOLUTION + 2, GRAPH_FRAME_COLOR);
-
+      //tft.fillRect(x, y + POSITION_OFFSET_Y, HORIZONTAL_RESOLUTION + 2, VERTICAL_RESOLUTION + 2, GRAPH_FRAME_COLOR);
 
       // draw label
       //tft.setCursor(x+2*guiSize, y+ 1*guiSize);
@@ -814,7 +815,6 @@ class GUI_Graph: public GUI_Object
       int oldy;
       int oldSig;
       int xx, yy;
-      uint16_t len;
 
       show();
 
@@ -823,16 +823,15 @@ class GUI_Graph: public GUI_Object
       if (firstCallFlag)
       {
         oldSignal = (uint16_t*)malloc(signalLength * 2);
+        for(n=0;n<signalLength;n++)oldSignal[n]=0;
         firstCallFlag = false;
       }
-
-      //len = signalLength;
-      //if (signalLength > SIGNAL_LENGTH)len = SIGNAL_LENGTH;
 
       for (n = 0; n < signalLength; n++)
       {
         xx = n + x + 1;
         int sig = coerce(signalBuffer[n], rangeMin, rangeMax);
+
         yy = map(sig, rangeMin, rangeMax, y + VERTICAL_RESOLUTION + POSITION_OFFSET_Y, y + POSITION_OFFSET_Y);
 
         if (n > 0)
@@ -841,9 +840,10 @@ class GUI_Graph: public GUI_Object
           tft.drawLine(oldx , oldSig, xx, oldSignal[n], COLOR_BLACK );
 
           // draw new line element
-          if (n < len - 1) // don't draw last element because it would generate artifacts
+          if (n < signalLength - 1) // don't draw last element because it would generate artifacts
           {
             tft.drawLine(oldx,    oldy, xx,            yy, GRAPH_SIGNAL_COLOR );
+            //tft.drawLine(oldx,    oldy, xx,            yy, COLOR_GREEN );
           }
         }
         oldx = xx;
