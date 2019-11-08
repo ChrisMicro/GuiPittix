@@ -697,7 +697,7 @@ class GUI_Text: public GUI_Object
 #define GRAPH_FRAME_COLOR    COLOR_GREY
 #define GRAPH_SIGNAL_COLOR   COLOR_YELLOW
 
-#define SIGNAL_LENGTH 128 // be aware that on the ARDUINO with ATMEGA328 you have only 2K of RAM
+//#define SIGNAL_LENGTH 128 // be aware that on the ARDUINO with ATMEGA328 you have only 2K of RAM
 
 class GUI_Graph: public GUI_Object
 {
@@ -755,7 +755,7 @@ class GUI_Graph: public GUI_Object
       textPosY      = y;
       textPosX      = x;
 
-      layoutNext_y += h + guiSize;
+      layoutNext_y += h + guiSize*3;
       //layoutNext_x += w + 2 * guiSize;
 
       color           = COLOR_GREEN;
@@ -946,42 +946,43 @@ class GUI_Menue : public GUI_Object
     {
       int8_t idx;
 
-      // draw frame
+
       int pos = textPosY;//+ FONT_HEIGTH;
 
       uint8_t font_height;
       font_height = FONT_HEIGTH * 2;
 
+      // clear background
       tft.fillRect(x, pos + font_height * 2, w, h, MENUE_FRAME_COLOR);
 
       pos += font_height;
-      //tft.fillRect(x, y + POSITION_OFFSET_Y, HORIZONTAL_RESOLUTION + 2, VERTICAL_RESOLUTION + 2, GRAPH_FRAME_COLOR);
 
       // draw label
-      //tft.setCursor(x+2*guiSize, y+ 1*guiSize);
       tft.setTextSize(guiSize );
 
       tft.setCursor(textPosX, pos );
       tft.setTextColor( MENUE_LABEL_COLOR );
       tft.print(objectName);
       tft.setTextColor( MENUE_TEXT_COLOR );
-      idx = index;
 
       pos += font_height;
 
-      idx--;
-      if (idx < 0)idx = numberOfEntries - 1;
+      idx = index-1; // the list displayed starts one entry before the current index
+
+      if (idx < 0) idx = numberOfEntries - 1; // if negative, we show circle around to the highes entry 
 
       for (int n = 0; n < numberOfEntriesDisplayed; n++)
       {
         pos += font_height;
         tft.setCursor(textPosX, pos );
-        if (n == 1) tft.setTextColor( COLOR_YELLOW, MENUE_SELECTED_COLOR );
+
+        if (n == 1) tft.setTextColor( COLOR_YELLOW, MENUE_SELECTED_COLOR ); // the second entry is the selected one
         else        tft.setTextColor( MENUE_TEXT_COLOR );
 
         tft.print(menue[idx]);
+
         idx++;
-        if (idx > numberOfEntries - 1)
+        if (idx >= numberOfEntries) // if the index is outside the number of entries, show a ---- line
         {
           pos += font_height;
           tft.setCursor(textPosX, pos );
@@ -996,14 +997,14 @@ class GUI_Menue : public GUI_Object
     void up()
     {
       index++;
-      if (index >= numberOfEntries)index = 0;
+      if (index >= numberOfEntries) index = 0;
       show();
     }
 
     void down()
     {
       index--;
-      if (index < 0) index = numberOfEntries;
+      if (index < 0) index = numberOfEntries-1;
       show();
     }
 
@@ -1012,6 +1013,17 @@ class GUI_Menue : public GUI_Object
       return index;
     }
 
+    void setIndex(int8_t idx)
+    {
+       int8_t temp=0;
+
+       if (idx>=0 && idx<numberOfEntries) temp=idx;// index in range?
+       if (temp!=index) //if index has changed, update display
+       { 
+          index = temp;  //update index
+          show();
+       }
+    }
 };
 #endif
 

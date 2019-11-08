@@ -29,7 +29,6 @@ char *Menue[] = {"point0", "point1", "point2", "point3", "point4" };
 
 void setup()
 {
-  Serial.begin(115200);
   gui.begin();
   menue.set(Menue, NumberOfMenueEntries);
   menue.show();
