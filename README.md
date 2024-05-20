@@ -24,3 +24,8 @@ If you want to use an STM32 MCU you have to install the [STM32GENERIC framework]
 <p align="left">
   <img src="/doc/GuiDemo.png" width="1024"/>
 </p>
+
+[CYD](https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/tree/main) (Cheap Yellow Display)  [Graph example](https://github.com/ChrisMicro/GuiPittix/blob/master/examples/Graph/Graph.ino)
+<p align="left">
+  <img src="/doc/CYD_GuiPittix.png" width="480"/>
+</p>
