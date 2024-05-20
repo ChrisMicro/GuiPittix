@@ -34,16 +34,6 @@
 SPIClass mySpi = SPIClass(VSPI);
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
 
-void printTouchToSerial(TS_Point p) {
-  Serial.print("Pressure = ");
-  Serial.print(p.z);
-  Serial.print(", x = ");
-  Serial.print(p.x);
-  Serial.print(", y = ");
-  Serial.print(p.y);
-  Serial.println();
-}
-
 GUI_Led       led1 (150, 10, "led1");
 GUI_Led       led2 (          "led2");
 
@@ -86,10 +76,6 @@ void loop(void)
     int value2 = slider2.getInt();
 
     number.print(value1 * value2);
-
-
-    printTouchToSerial(p);
-
   }
   delay(50);
 }
