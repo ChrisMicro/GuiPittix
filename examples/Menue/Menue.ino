@@ -7,10 +7,11 @@
 */
 
 // choose your hardware:
+#define TFT_Adapter_CYD_V1_2
 //#define TFT_Adapter_SPFD5408_UNO
 //#define TFT_Adapter_ILI9341_BluePill
 //#define TFT_Adapter_STM32F746_Discovery
-#define TFT_Adapter_ILI9341_F407_Discovery
+//#define TFT_Adapter_ILI9341_F407_Discovery
 //#define TFT_TEK // TEK4010 emulation to Teraterm
 
 #include "Gui.h"
@@ -29,6 +30,7 @@ char *Menue[] = {"point0", "point1", "point2", "point3", "point4" };
 
 void setup()
 {
+  Serial.begin(115200);
   gui.begin();
   menue.set(Menue, NumberOfMenueEntries);
   menue.show();

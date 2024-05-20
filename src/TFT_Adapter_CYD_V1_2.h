@@ -1,37 +1,33 @@
 /*
- * GuiPittix TFT Adapter
- * 
- * Chnage this file depending on your hardware configuration
- * 
- * Hardware:
- *  TFT: SDFP5408 Arduino Shield with parallel interface
- *  http://www.ebay.de/itm/2-4-TFT-LCD-Display-Shield-Touch-Panel-ILI9341-240X320-for-Arduino-UNO-MEGA-/382052804437
- *  Library https://github.com/JoaoLopesF/SPFD5408
- *  MCU: Arduino Uno
- *
- * 2017, ChrisMicro
- * 
- */
+
+  by ChrisMicro
+
+*/
 #ifndef _TFT_ADAPTER_
 #define _TFT_ADAPTER_
 
 #include <stdint.h>
-#include <SPFD5408_Adafruit_GFX.h>    // Core graphics library
-#include <SPFD5408_Adafruit_TFTLCD.h> // Hardware-specific library
 
-#define LCD_CS A3 // Chip Select goes to Analog 3
-#define LCD_CD A2 // Command/Data goes to Analog 2
-#define LCD_WR A1 // LCD Write goes to Analog 1
-#define LCD_RD A0 // LCD Read goes to Analog 0
+#include "SPI.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"
 
-class TFT_Adapter : public Adafruit_TFTLCD 
+#define TFT_BL   21
+#define TFT_CS   15
+#define TFT_DC    2
+#define TFT_MISO 12
+#define TFT_MOSI 13
+#define TFT_SCLK 14
+#define TFT_RST  -1
+
+class TFT_Adapter : public Adafruit_ILI9341 
 {
   public:
-    TFT_Adapter():Adafruit_TFTLCD(LCD_CS, LCD_CD, LCD_WR, LCD_RD, A4){};
+    TFT_Adapter():Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST, TFT_MISO){};
     void begin()
     {
-      Adafruit_TFTLCD::begin((uint16_t)0x9341); // SDFP5408
-      Adafruit_TFTLCD::setRotation(3); 
+      Adafruit_ILI9341::begin();
+      Adafruit_ILI9341::setRotation(1); 
     };
 
 };

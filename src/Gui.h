@@ -28,8 +28,11 @@ class Gui
     {
       tft.begin();
       tft.fillScreen(COLOR_BLACK);
-
-
+      // tbd: generalize this hack vor the CYD:
+#ifdef TFT_Adapter_CYD_V1_2
+      pinMode(TFT_BL, OUTPUT);
+      digitalWrite(TFT_BL, HIGH);
+#endif
     }
 
     // tell the gui the finger coordinates
